@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@layer base {
+  button,
+  fieldset {
+    @apply cursor-pointer disabled:cursor-not-allowed;
+  }
+  :root.dark {
+    @apply scheme-dark;
+  }
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
