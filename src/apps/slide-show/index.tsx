@@ -52,6 +52,9 @@ function ControlButton(props: React.ComponentProps<'button'>) {
 }
 
 function SlideImage(props: { show: boolean; src: string }) {
+  const tw_style = props.show
+    ? 'opacity-100 blur-none z-10'
+    : 'opacity-0 blur-sm z-0'
   return (
     <img
       src={props.src}
@@ -59,7 +62,7 @@ function SlideImage(props: { show: boolean; src: string }) {
       aria-hidden={!props.show}
       height={300}
       width={300}
-      className={`rounded-sm transition-all duration-300 ease-in-out ${props.show ? 'opacity-100 blur-none' : 'opacity-0 blur-sm'}`}
+      className={`rounded-sm transition-all duration-300 ease-in-out ${tw_style}`}
     />
   )
 }

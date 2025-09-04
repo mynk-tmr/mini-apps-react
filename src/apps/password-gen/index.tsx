@@ -50,10 +50,10 @@ function App() {
         max="32"
         value={length}
         onChange={(e) => setLength(e.target.valueAsNumber)}
-        className="accent-pink-300"
+        className="accent-slate-300"
       />
-      <span>
-        Picked <b className="text-green-500">{length}</b> length
+      <span className="text-lg">
+        Picked <b className="text-teal-500">{length}</b> length
       </span>
     </div>
   )

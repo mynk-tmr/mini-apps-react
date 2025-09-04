@@ -7,7 +7,7 @@ export function useSlideShow(max: number) {
     max,
     prev: () => setActive((a) => (a === 0 ? max - 1 : a - 1)),
     next: () => setActive((a) => (a + 1) % max),
-    goto: (i: number) => i < max && i >= 0 && setActive(i),
+    goto: (i: number) => setActive(i),
   }
 }
 
