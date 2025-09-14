@@ -10,28 +10,34 @@ function App() {
   const tw_input =
     'p-4 border rounded-sm font-mono min-w-xs placeholder:capitalize'
 
-  const email_regex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
-  const name_regex = /^[A-Za-z]{3,20}$/
-  const pass_regex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,24}$/
+  const tw_buton = 'p-2 bg-sky-600 hover:bg-sky-700'
 
-  const { register, errors, handleSubmit } = useForm({
+  const number_regex = /^[0-9]+$/
+
+  const { register, errors, handleSubmit, reset } = useForm({
     fields: {
-      username: '',
-      email: '',
-      password: '',
+      name: '',
+      price: '',
+      discount: '',
     },
-    validator: (key, fields) => {
-      if (key === 'username' && !name_regex.test(fields.username))
-        return 'Must be 3-20 characters & only letters'
-      if (key === 'email' && !email_regex.test(fields.email))
-        return 'Invalid Email'
-      if (key === 'password' && !pass_regex.test(fields.password))
-        return 'Must be 8-24 characters & contain 1 uppercase, 1 lowercase, 1 number & 1 special character'
+    validator: (fields, nextErrors) => {
+      if (!fields.name) {
+        nextErrors.name = 'Name is required'
+      }
+      if (!fields.price) {
+        nextErrors.price = 'Price is required'
+      } else if (!number_regex.test(fields.price)) {
+        nextErrors.price = 'Price must be a number without decimal places'
+      }
+      if (!fields.discount) {
+        nextErrors.discount = 'Discount is required'
+      } else if (!number_regex.test(fields.discount)) {
+        nextErrors.discount = 'Discount must be a number without decimal places'
+      } else if (Number(fields.discount) >= Number(fields.price)) {
+        nextErrors.discount = 'Discount must be less than the price'
+      }
     },
   })
-
-  const [showPass, setshowPass] = useState(false)
 
   return (
     <form
@@ -41,50 +47,48 @@ function App() {
     >
       <input
         className={tw_input}
-        placeholder="name"
+        placeholder="Name"
         type="text"
-        {...register('username')}
+        {...register('name')}
       />
-      {errors.username && <small>⚠️ {errors.username}</small>}
+      {errors.name && <small>⚠️ {errors.name}</small>}
       <input
         className={tw_input}
-        placeholder="email"
-        type="email"
-        {...register('email')}
+        placeholder="Price"
+        type="number"
+        {...register('price')}
       />
-      {errors.email && <small>⚠️ {errors.email}</small>}
+      {errors.price && <small>⚠️ {errors.price}</small>}
       <input
         className={tw_input}
-        placeholder="password"
-        type={showPass ? 'text' : 'password'}
-        {...register('password')}
+        placeholder="Discount"
+        type="number"
+        {...register('discount')}
       />
-      {errors.password && <small className="w-xs">⚠️ {errors.password}</small>}
-      <button type="submit" className="py-2 bg-violet-600 hover:bg-sky-500">
+
+      {errors.discount && <small>⚠️ {errors.discount}</small>}
+      <button type="submit" className={tw_buton}>
         Submit
       </button>
-      <label>
-        <input
-          className="accent-violet-500"
-          type="checkbox"
-          onChange={() => setshowPass(!showPass)}
-          checked={showPass}
-        />{' '}
-        Show Password
-      </label>
+      <button type="reset" className={tw_buton} onClick={reset}>
+        Reset
+      </button>
     </form>
   )
 }
 
 type Config<T extends string> = {
   fields: Record<T, string>
-  validator: (key: T, fields: Config<T>['fields']) => string | undefined
+  validator: (
+    fields: Config<T>['fields'],
+    nextErrors: Config<T>['fields'],
+  ) => void | Promise<void>
 }
 
 function useForm<T extends string>(config: Config<T>) {
   const { fields, validator } = config
   const [values, setValues] = useState(fields)
-  const [errors, setErrors] = useState(fields)
+  const [errors, setErrors] = useState({} as typeof fields)
 
   function register(key: T) {
     return {
@@ -98,23 +102,27 @@ function useForm<T extends string>(config: Config<T>) {
 
   function onChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target
-    setValues({ ...values, [name]: value })
-    const error = validator(name as T, { ...values, [name]: value })
-    setErrors({ ...errors, [name]: error || '' })
+    const nextValues = { ...values, [name]: value }
+    const nextErrors = {} as typeof errors
+    validator(nextValues, nextErrors)
+    setValues(nextValues)
+    setErrors(nextErrors)
   }
 
   function handleSubmit(cb: (f: typeof fields) => void | Promise<void>) {
-    const onSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
+    return (async (e) => {
       e.preventDefault()
       const nextErrors = {} as typeof errors
-      for (const key in errors) {
-        nextErrors[key] = validator(key, values) || ''
-      }
+      validator(values, nextErrors)
       setErrors(nextErrors)
       if (Object.values(nextErrors).some(Boolean)) return
       await cb(values)
-    }
-    return onSubmit
+    }) satisfies React.FormEventHandler<HTMLFormElement>
+  }
+
+  function reset() {
+    setValues(fields)
+    setErrors({} as typeof errors)
   }
 
   return {
@@ -122,5 +130,6 @@ function useForm<T extends string>(config: Config<T>) {
     errors,
     register,
     handleSubmit,
+    reset,
   }
 }
