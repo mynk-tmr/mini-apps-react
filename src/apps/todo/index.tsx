@@ -9,7 +9,7 @@ export default {
 
 function App() {
   return (
-    <div>
+    <div className="min-w-xs">
       <AddTodo />
       <TodoList />
     </div>
@@ -20,6 +20,7 @@ function AddTodo() {
   const [value, setValue] = useState('')
   return (
     <form
+      className="flex gap-2 *:font-mono *:rounded-sm *:border *:p-2"
       onSubmit={(e) => {
         e.preventDefault()
         $todos.add(value)
@@ -27,15 +28,13 @@ function AddTodo() {
       }}
     >
       <input
+        className="grow"
         type="text"
         required
-        className="p-2 border rounded-sm font-mono min-w-sm"
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
-      <button type="submit" className="border rounded-r-sm p-2">
-        Add
-      </button>
+      <button type="submit">Add</button>
     </form>
   )
 }
@@ -68,7 +67,7 @@ function TodoItem(props: { id: number }) {
   if (!todo) throw new Error('Todo not found')
 
   return (
-    <li className="flex border-b py-2 text-lg">
+    <li className="flex border-b py-2 text-lg gap-2">
       {todo.edit ? <EditMode {...todo} /> : <ShowMode {...todo} />}
       <button type="button" onClick={() => $todos.remove(todo.id)}>
         🗑️
@@ -90,7 +89,7 @@ function EditMode(props: Todo) {
       <input
         type="text"
         required
-        className="p-2 border rounded-sm grow text-sm"
+        className="mr-2 p-2 border rounded-sm grow text-sm"
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
