@@ -1,4 +1,8 @@
-import { useAutoPlay, useSlideShow } from './funcs'
+import {
+  SlideShowProvider,
+  useAutoPlay,
+  useSlideShow,
+} from './context-provider'
 
 export default {
   title: 'Slide Show',
@@ -6,35 +10,39 @@ export default {
   component: App,
 }
 
-const images = Array.from(
-  { length: 8 },
-  (_, i) => `https://i.pravatar.cc/300?u=${i * 8}`,
-).reverse()
-
 function App() {
-  const cara = useSlideShow(images.length)
+  const images = Array.from(
+    { length: 8 },
+    (_, i) => `https://i.pravatar.cc/300?u=${i * 8}`,
+  ).reverse()
   return (
-    <div>
-      <ImageGrid {...cara} />
-      <small className="text-center block mt-3">
-        Showing {cara.active + 1} / {images.length}
-      </small>
-      <GotoButtons {...cara} />
-      <PlayButton strategy={cara.next} />
-    </div>
+    <SlideShowProvider images={images}>
+      <div>
+        <ImageGrid />
+        <Showing />
+        <GotoButtons />
+        <PlayButton />
+      </div>
+    </SlideShowProvider>
   )
 }
 
-function ImageGrid(props: ReturnType<typeof useSlideShow>) {
+function Showing() {
+  const { active, max } = useSlideShow()
+  return (
+    <small className="text-center block mt-3">
+      Showing {active + 1} / {max}
+    </small>
+  )
+}
+
+function ImageGrid() {
+  const { prev, next } = useSlideShow()
   return (
     <div className="flex gap-4 items-center">
-      <ControlButton onClick={props.prev}>&lt;</ControlButton>
-      <div className="grow grid *:col-start-1 *:row-start-1 overflow-x-hidden">
-        {images.map((image, i) => (
-          <SlideImage key={image} show={i === props.active} src={image} />
-        ))}
-      </div>
-      <ControlButton onClick={props.next}>&gt;</ControlButton>
+      <ControlButton onClick={prev}>&lt;</ControlButton>
+      <SlideImages />
+      <ControlButton onClick={next}>&gt;</ControlButton>
     </div>
   )
 }
@@ -51,32 +59,39 @@ function ControlButton(props: React.ComponentProps<'button'>) {
   )
 }
 
-function SlideImage(props: { show: boolean; src: string }) {
-  const tw_style = props.show
-    ? 'opacity-100 blur-none z-10'
-    : 'opacity-0 blur-sm z-0'
+function SlideImages() {
+  const { active, images } = useSlideShow()
+
   return (
-    <img
-      src={props.src}
-      alt={`Carousel image`}
-      aria-hidden={!props.show}
-      height={300}
-      width={300}
-      className={`rounded-sm transition-all duration-300 ease-in-out ${tw_style}`}
-    />
+    <div className="grow grid *:col-start-1 *:row-start-1 overflow-x-hidden">
+      {images.map((image, i) => (
+        <img
+          key={i}
+          src={image}
+          alt={`Carousel image`}
+          aria-hidden={i !== active}
+          height={300}
+          width={300}
+          className={`rounded-sm transition-all duration-300 ease-in-out
+            ${i === active ? 'z-10 blur-none opacity-100' : 'z-0 blur-sm opacity-0'}
+        `}
+        />
+      ))}
+    </div>
   )
 }
 
-function GotoButtons(props: ReturnType<typeof useSlideShow>) {
+function GotoButtons() {
+  const { images, goto, active } = useSlideShow()
   return (
     <div className="flex flex-wrap justify-center gap-4 mt-4">
       {images.map((_, i) => (
         <button
           key={i}
-          disabled={i === props.active}
+          disabled={i === active}
           type="button"
           className="border rounded-full size-8 disabled:border-yellow-500"
-          onClick={() => props.goto(i)}
+          onClick={() => goto(i)}
         >
           {i + 1}
         </button>
@@ -85,8 +100,9 @@ function GotoButtons(props: ReturnType<typeof useSlideShow>) {
   )
 }
 
-function PlayButton(props: { strategy: () => void }) {
-  const { playing, toggle } = useAutoPlay(props.strategy)
+function PlayButton() {
+  const { next } = useSlideShow()
+  const { playing, toggle } = useAutoPlay(next)
   return (
     <button
       type="button"

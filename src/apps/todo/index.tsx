@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { type Todo, todoCtr, useTodoStore } from './store'
+import { $todos, type Todo, useTodoStore } from './store'
 
 export default {
   title: 'Todo App',
@@ -22,7 +22,7 @@ function AddTodo() {
     <form
       onSubmit={(e) => {
         e.preventDefault()
-        todoCtr.add(value)
+        $todos.add(value)
         setValue('')
       }}
     >
@@ -49,15 +49,11 @@ function TodoList() {
       </section>
     )
   }
-
   return <ShowTodos />
 }
 
 function ShowTodos() {
-  const todoIds = useTodoStore(
-    (todos) => todos.map((t) => t.id),
-    (a, b) => a.length === b.length,
-  )
+  const todoIds = useTodoStore((todos) => todos).map((t) => t.id)
   return (
     <ul className="grid gap-y-3 my-4">
       {todoIds.map((id) => (
@@ -74,7 +70,7 @@ function TodoItem(props: { id: number }) {
   return (
     <li className="flex border-b py-2 text-lg">
       {todo.edit ? <EditMode {...todo} /> : <ShowMode {...todo} />}
-      <button type="button" onClick={() => todoCtr.remove(todo.id)}>
+      <button type="button" onClick={() => $todos.remove(todo.id)}>
         🗑️
       </button>
     </li>
@@ -87,7 +83,7 @@ function EditMode(props: Todo) {
     <form
       onSubmit={(e) => {
         e.preventDefault()
-        todoCtr.save(props.id, value)
+        $todos.save(props.id, value)
       }}
       className="grow flex"
     >
@@ -111,11 +107,11 @@ function ShowMode(props: Todo) {
           type="checkbox"
           className="size-4 mr-2"
           checked={props.done}
-          onChange={() => todoCtr.toggleDone(props.id)}
+          onChange={() => $todos.toggleDone(props.id)}
         />
         {props.title}
       </label>
-      <button type="button" onClick={() => todoCtr.toggleEdit(props.id)}>
+      <button type="button" onClick={() => $todos.toggleEdit(props.id)}>
         ✏️
       </button>
     </>

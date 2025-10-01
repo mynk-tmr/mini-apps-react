@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore } from 'react'
+import { useSyncExternalStore } from 'react'
 
 export type Todo = {
   id: number
@@ -7,54 +7,53 @@ export type Todo = {
   edit: boolean
 }
 
-let todos = [] as Todo[]
-const subs = new Set<() => void>()
-
-function update(next: Todo[]) {
-  todos = next
-  for (const cb of subs) cb()
+class Store {
+  private subs: Set<() => void> = new Set()
+  private state: Todo[]
+  constructor() {
+    this.state = JSON.parse(localStorage.getItem('todos') || '[]')
+    this.subscribe = this.subscribe.bind(this)
+    this.subscribe(() =>
+      localStorage.setItem('todos', JSON.stringify(this.state)),
+    )
+  }
+  get snapshot() {
+    return this.state
+  }
+  subscribe(cb: () => void) {
+    this.subs.add(cb)
+    return () => this.subs.delete(cb)
+  }
+  emit() {
+    for (const cb of this.subs) cb()
+  }
+  add(title: string) {
+    const id = Date.now()
+    this.state = [...this.state, { id, title, done: false, edit: false }]
+    this.emit()
+  }
+  remove(id: number) {
+    this.state = this.state.filter((t) => t.id !== id)
+    this.emit()
+  }
+  change(updater: (t: Todo) => Todo, id: number) {
+    this.state = this.state.map((t) => (t.id === id ? updater(t) : t))
+    this.emit()
+  }
+  toggleDone(id: number) {
+    this.change((t) => ({ ...t, done: !t.done }), id)
+  }
+  toggleEdit(id: number) {
+    this.change((t) => ({ ...t, edit: !t.edit }), id)
+  }
+  save(id: number, title: string) {
+    this.change((t) => ({ ...t, title, edit: false }), id)
+  }
 }
 
-function subscribe(cb: () => void) {
-  subs.add(cb)
-  return () => subs.delete(cb)
-}
+export const $todos = new Store()
 
 //creates slices of the store
-export function useTodoStore<T>(
-  selector: (t: Todo[]) => T,
-  eqFn: (neo: T, old: T) => boolean = Object.is,
-) {
-  const [$todos, setTodos] = useState(() => selector(todos))
-  return useSyncExternalStore(subscribe, () => {
-    const $next = selector(todos)
-    if (!eqFn($next, $todos)) setTodos($next)
-    return $todos
-  })
-}
-
-let nextid = 0
-export const todoCtr = {
-  add(title: string) {
-    update(
-      todos.concat({
-        id: ++nextid,
-        title,
-        done: false,
-        edit: false,
-      }),
-    )
-  },
-  remove(id: number) {
-    update(todos.filter((t) => t.id !== id))
-  },
-  toggleDone(id: number) {
-    update(todos.map((t) => (t.id === id ? { ...t, done: !t.done } : t)))
-  },
-  toggleEdit(id: number) {
-    update(todos.map((t) => (t.id === id ? { ...t, edit: !t.edit } : t)))
-  },
-  save(id: number, title: string) {
-    update(todos.map((t) => (t.id === id ? { ...t, title, edit: false } : t)))
-  },
+export function useTodoStore<T>(selector: (t: Todo[]) => T) {
+  return useSyncExternalStore($todos.subscribe, () => selector($todos.snapshot))
 }
