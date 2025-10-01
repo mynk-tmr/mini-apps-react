@@ -6,4 +6,11 @@ export default defineConfig({
   output: {
     assetPrefix: '/mini-apps-react/',
   },
+  server: {
+    port: 9711,
+    base: '/mini-apps-react/',
+  },
+  html: {
+    favicon: './src/favicon.ico',
+  },
 })

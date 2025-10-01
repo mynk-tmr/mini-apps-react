@@ -2,12 +2,14 @@ import { Link, Route, Switch } from 'wouter'
 import { routes } from './apps'
 import { BaseLayout } from './layout/base'
 
+const basepath = '/mini-apps-react'
+
 export default function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path={`${basepath}/`} component={Home} />
       {routes.map((route) => (
-        <Route key={route.href} path={route.href}>
+        <Route key={route.href} path={`${basepath}${route.href}`}>
           <BaseLayout h1={route.title} body={<route.component />} />
         </Route>
       ))}
@@ -19,7 +21,7 @@ export default function Router() {
 function Box(props: { route: (typeof routes)[number] }) {
   const route = props.route
   return (
-    <Link href={route.href} className="border p-4 m-1 block">
+    <Link href={`${basepath}${route.href}`} className="border p-4 m-1 block">
       {route.title}
     </Link>
   )
