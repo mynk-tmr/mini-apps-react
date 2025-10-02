@@ -1,3 +1,4 @@
+import cvBuilder from './cv-builder'
 import forms from './forms'
 import passwordGen from './password-gen'
 import quizTaker from './quiz-taker'
@@ -14,4 +15,5 @@ export const routes = [
   todo,
   quizTaker,
   stopwatch,
+  cvBuilder,
 ]
