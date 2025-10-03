@@ -3,20 +3,20 @@ import { $education, $personal, $work } from './data'
 import { useStore } from './store'
 
 function PersonalForm() {
-  const personalData = useStore($personal, ([v]) => v)
+  const personalData = useStore($personal, (v) => v)
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    $personal.update(([v]) => [{ ...v, [name]: value }])
+    $personal.update((v) => ({ ...v, [name]: value }))
   }
   const fields = [
-    { type: 'text', name: 'fullname', placeholder: 'Full Name', onChange },
-    { type: 'email', name: 'email', placeholder: 'Email', onChange },
-    { type: 'tel', name: 'phone', placeholder: 'Phone', onChange },
-    { type: 'text', name: 'address', placeholder: 'Address', onChange },
+    { type: 'text', name: 'fullname', placeholder: 'Full Name' },
+    { type: 'email', name: 'email', placeholder: 'Email' },
+    { type: 'tel', name: 'phone', placeholder: 'Phone' },
+    { type: 'text', name: 'address', placeholder: 'Address' },
   ] as (React.ComponentProps<'input'> & { name: keyof typeof personalData })[]
   return (
     <Accordion title="😄 Personal Details">
-      {fields.map(({ type, name, placeholder, onChange }) => (
+      {fields.map(({ type, name, placeholder }) => (
         <input
           key={name}
           type={type}

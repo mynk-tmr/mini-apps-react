@@ -19,6 +19,10 @@ export class Store<T> {
     this.state = updater(this.state)
     this.emit()
   }
+  set(state: T) {
+    this.state = state
+    this.emit()
+  }
 }
 
 //creates slices of the store

@@ -1,4 +1,4 @@
-import { $color, $font, $invert, $layout } from './data'
+import { $color, $font, $invert, $layout, resetAll } from './data'
 import { useStore } from './store'
 
 export function Customiser() {
@@ -99,7 +99,7 @@ function Reset() {
     <button
       type="button"
       className="bg-rose-600 p-2 rounded-sm"
-      onClick={() => window.location.reload()}
+      onClick={resetAll}
     >
       Reset
     </button>

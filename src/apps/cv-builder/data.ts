@@ -1,14 +1,12 @@
 import { Store } from './store'
 
 const data = {
-  personal: [
-    {
-      fullname: 'Mayank Tomar',
-      email: 'TtjXv@example.com',
-      phone: '9876543210',
-      address: 'New Delhi, India',
-    },
-  ],
+  personal: {
+    fullname: 'Mayank Tomar',
+    email: 'TtjXv@example.com',
+    phone: '9876543210',
+    address: 'New Delhi, India',
+  },
   education: [
     {
       school: 'University of Delhi',
@@ -42,3 +40,13 @@ export const $font = new Store(data.font)
 export const $color = new Store(data.color)
 export const $invert = new Store(data.invert)
 export const $layout = new Store(data.layout)
+
+export function resetAll() {
+  $personal.set(data.personal)
+  $education.set(data.education)
+  $work.set(data.work)
+  $font.set(data.font)
+  $color.set(data.color)
+  $invert.set(data.invert)
+  $layout.set(data.layout)
+}

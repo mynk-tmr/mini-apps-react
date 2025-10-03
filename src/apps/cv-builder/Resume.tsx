@@ -31,7 +31,7 @@ export function Resume() {
 function Header() {
   const invert = useStore($invert, (v) => v)
   const color = useStore($color, (v) => v)
-  const { fullname, email, phone, address } = useStore($personal, ([v]) => v)
+  const { fullname, email, phone, address } = useStore($personal, (v) => v)
   return (
     <header
       style={{ background: color }}
